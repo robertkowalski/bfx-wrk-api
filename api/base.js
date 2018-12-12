@@ -158,7 +158,7 @@ class Api {
         console.error('[CRITICAL] callback called twice')
         return
       }
-
+      console.log(err, res)
       isExecuted = true
       cb(_.isError(err) ? new Error(`ERR_API_BASE: ${err.message}`) : err, res)
     })
@@ -166,8 +166,28 @@ class Api {
     const method = this[action]
 
     try {
-      method.apply(this, args)
+      const isPurePromiseHandler = /^prm_/.test(action)
+      if (!isPurePromiseHandler) {
+        method.apply(this, args)
+        return
+      }
+
+      console.log('isPurePromiseHandler', isPurePromiseHandler)
+      const cb = args.pop()
+
+      const promise = method.apply(this, args)
+      if (promise instanceof Promise) {
+        promise
+          .then((res) => {
+            cb(null, res)
+          })
+          .catch((err) => {
+            cb(err)
+          })
+      }
+
     } catch (e) {
+      console.log("CATCH")
       isExecuted = true
       console.error(e)
       cb(new Error(`ERR_API_ACTION: ${e.message}`))
