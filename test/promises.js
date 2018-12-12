@@ -60,8 +60,14 @@ class ServiceApi extends Api {
     }
   }
 
+  parseDocs (a) {
+    return parse(a)
+  }
+
   async prm_asyncWithCbThrows (space, ip, cb) {
-    throw new Error('boom')
+    const b = parseDocs()
+
+    return b
   }
 
   twoCallbacks (space, cb) {
